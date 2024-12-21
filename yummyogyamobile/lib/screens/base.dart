@@ -49,8 +49,12 @@ class _BasePageState extends State<BasePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_titles[_currentIndex]),
-        backgroundColor: Colors.orange,
+        title: Text(
+          _titles[_currentIndex],
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color(0xFFEA580C),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       drawer: const LeftDrawer(),
       body: PageView(
