@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:yummyogya_mobile/screens/menu.dart';
 import 'package:yummyogya_mobile/screens/register.dart';
-import 'package:yummyogya_mobile/variable.dart';
+import 'package:yummyogya_mobile/utils/auth.dart';
+import 'package:yummyogya_mobile/utils/variable.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -54,18 +55,23 @@ class _LoginPageState extends State<LoginPage> {
       if (response.statusCode == 200) {
         if (data['status'] == true) {
           String message = data['message'];
-          String uname = data['username'];
+          Map<String, dynamic> userData = data['user_data'];
 
+          await Auth.saveUser(userData);
+
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => MyHomePage(username: uname),
+              builder: (context) => const MyHomePage(),
             ),
           );
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
-              SnackBar(content: Text("$message Selamat datang, $uname!")),
+              SnackBar(
+                  content: Text(
+                      "$message Selamat datang, ${userData['username']}!")),
             );
         } else {
           String errorMessage = data['message'] ?? 'Gagal login.';
@@ -74,7 +80,8 @@ class _LoginPageState extends State<LoginPage> {
           );
         }
       } else {
-        String errorMessage = data['message'] ?? 'Terjadi kesalahan saat login.';
+        String errorMessage =
+            data['message'] ?? 'Terjadi kesalahan saat login.';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error: $errorMessage")),
         );

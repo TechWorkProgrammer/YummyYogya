@@ -66,7 +66,7 @@ class _SearchPageState extends State<SearchPage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => MyHomePage(username: widget.username),
+            builder: (context) => const MyHomePage(),
           ),
         );
         break;
@@ -91,7 +91,7 @@ class _SearchPageState extends State<SearchPage> {
         title: const Text('Cari Makanan'),
         backgroundColor: Colors.orange,
       ),
-      drawer: LeftDrawer(username: widget.username),
+      drawer: const LeftDrawer(),
       body: Column(
         children: [
           // Baris yang berisi Search Bar, Dropdown Kategori, dan Tombol Rentang Harga

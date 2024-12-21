@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:yummyogya_mobile/screens/login.dart';
-import 'package:yummyogya_mobile/variable.dart';
+import 'package:yummyogya_mobile/screens/menu.dart';
+import 'package:yummyogya_mobile/utils/variable.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -68,13 +69,20 @@ class _RegisterPageState extends State<RegisterPage> {
       if (response.statusCode == 200) {
         if (data['status'] == true) {
           String message = data['message'];
+          Map<String, dynamic> userData = data['user_data'];
 
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(content: Text("$message Registrasi berhasil!")),
             );
-          Navigator.pop(context);
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const MyHomePage(),
+            ),
+          );
         } else {
           String errorMessage = data['message'] ?? 'Gagal registrasi.';
           ScaffoldMessenger.of(context).showSnackBar(

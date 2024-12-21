@@ -1,108 +1,149 @@
 import 'package:flutter/material.dart';
 import 'package:yummyogya_mobile/dashboard/screens/dashboard_screen.dart';
+import 'package:yummyogya_mobile/screens/login.dart';
+import 'package:yummyogya_mobile/utils/auth.dart';
+import 'package:yummyogya_mobile/utils/variable.dart';
+import 'package:yummyogya_mobile/widgets/menu_item.dart';
 
-class LeftDrawer extends StatelessWidget {
-  final String username; // Parameter untuk nama pengguna
+class LeftDrawer extends StatefulWidget {
+  const LeftDrawer({super.key});
 
-  const LeftDrawer({Key? key, required this.username}) : super(key: key);
+  @override
+  State<LeftDrawer> createState() => _LeftDrawerState();
+}
+
+class _LeftDrawerState extends State<LeftDrawer> {
+  String username = 'Pengguna';
+  String? profilePhoto;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final userData = await Auth.getUser();
+    if (userData != null && mounted) {
+      setState(() {
+        username = userData['username'] ?? 'Pengguna';
+        profilePhoto = userData['profile']?['profile_photo'];
+      });
+    }
+  }
+
+  Future<void> _logout() async {
+    await Auth.deleteUser();
+    if (mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+            (route) => false,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Anda telah logout')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
+      child: Column(
         children: [
-          // Drawer Header
-          DrawerHeader(
+          Container(
+            padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 20.0),
             decoration: const BoxDecoration(
-              color: Colors.orange,
+              color: Color(0xFFEA580C),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundImage: NetworkImage(
-                      'https://via.placeholder.com/150'), // Ganti dengan gambar profil
+                CircleAvatar(
+                  radius: 35,
+                  backgroundImage: profilePhoto != null
+                      ? NetworkImage('$baseUrl/$profilePhoto')
+                      : const AssetImage('assets/default_avatar.png')
+                  as ImageProvider,
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  'Selamat Datang, $username!', // Menampilkan nama pengguna
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                const SizedBox(width: 16.0),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Selamat Datang, $username!',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4.0),
+                      const Text(
+                        'Jelajahi fitur aplikasi.',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-
-          // Menu Items
-          ListTile(
-            leading: const Icon(Icons.search),
-            title: const Text('Cari Makanan'),
-            onTap: () {
-              Navigator.pushNamed(
-                  context, '/search'); // Route ke halaman Cari Makanan
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.edit),
-            title: const Text('Edit Profil'),
-            onTap: () {
-              Navigator.pushNamed(
-                  context, '/editProfile'); // Route ke halaman Edit Profil
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.dashboard),
-            title: const Text('Dashboard'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DashboardScreen(username: username),
+          Expanded(
+            child: ListView(
+              children: [
+                MenuItem(
+                  icon: Icons.search,
+                  text: 'Cari Makanan',
+                  onTap: () => Navigator.pushNamed(context, '/search'),
                 ),
-              );
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.favorite),
-            title: const Text('Wishlist'),
-            onTap: () {
-              Navigator.pushNamed(context,
-                  '/wishlist'); // Route ke halaman Wishlist (on progress)
-            },
-          ),
-
-          // Divider
-          const Divider(),
-
-          // Back to Homepage
-          ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('Kembali ke Homepage'),
-            onTap: () {
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/menu', // Route ke homepage (landing page)
-                (route) => false, // Menghapus semua rute sebelumnya
-              );
-            },
-          ),
-
-          // Logout Option
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Logout'),
-            onTap: () {
-              // Logika logout
-              Navigator.pop(context); // Tutup drawer
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Anda telah logout')),
-              );
-            },
+                MenuItem(
+                  icon: Icons.edit,
+                  text: 'Edit Profil',
+                  onTap: () => Navigator.pushNamed(context, '/editProfile'),
+                ),
+                MenuItem(
+                  icon: Icons.dashboard,
+                  text: 'Dashboard',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DashboardScreen(username: username),
+                      ),
+                    );
+                  },
+                ),
+                MenuItem(
+                  icon: Icons.favorite,
+                  text: 'Wishlist',
+                  onTap: () => Navigator.pushNamed(context, '/wishlist'),
+                ),
+                const Divider(),
+                MenuItem(
+                  icon: Icons.home,
+                  text: 'Kembali ke Homepage',
+                  onTap: () {
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      '/menu',
+                          (route) => false,
+                    );
+                  },
+                ),
+                MenuItem(
+                  icon: Icons.logout,
+                  text: 'Logout',
+                  onTap: _logout,
+                ),
+              ],
+            ),
           ),
         ],
       ),
