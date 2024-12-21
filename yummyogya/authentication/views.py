@@ -15,7 +15,6 @@ from django.views.decorators.csrf import csrf_exempt
 
 from profilepage.models import Profile
 
-
 @csrf_exempt
 def login_flutter(request):
     if request.method == "POST":

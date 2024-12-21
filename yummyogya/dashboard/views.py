@@ -1,22 +1,17 @@
 import json
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Food
+
 from django.contrib.auth.decorators import login_required
-from .forms import FoodForm
-from django.http import JsonResponse
 from django.contrib.auth.models import User
-from rest_framework.views import APIView
-from rest_framework import status
-
-
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+
+from .forms import FoodForm
+from .models import Food
 from .serializers import FoodSerializer
-from django.views.decorators.csrf import csrf_exempt
+
 
 def get_user_id(request):
     username = request.GET.get('username')
@@ -28,6 +23,7 @@ def get_user_id(request):
         return JsonResponse({'user_id': user.id}, status=200)
     return JsonResponse({'error': 'User not found'}, status=404)
 
+
 @csrf_exempt
 def add_food_flutter(request):
     if request.method == "POST":
@@ -38,7 +34,7 @@ def add_food_flutter(request):
             if not user_id:
                 return JsonResponse({'error': 'User ID is required'}, status=400)
 
-            user = User.objects.get(id=user_id) 
+            user = User.objects.get(id=user_id)
             food = Food.objects.create(
                 name=data['name'],
                 price=data['price'],
@@ -47,13 +43,14 @@ def add_food_flutter(request):
                 restaurant=data.get('restaurant', ''),
                 rating=data.get('rating', 0),
                 image_url=data.get('image_url', ''),
-                created_by=user 
-                
+                created_by=user
+
             )
             return JsonResponse({'message': 'Makanan berhasil ditambahkan', 'id': food.id}, status=201)
         except Exception as e:
             return JsonResponse({'error': f'Gagal menambahkan makanan: {str(e)}'}, status=400)
     return JsonResponse({'error': 'Metode tidak diizinkan'}, status=405)
+
 
 @csrf_exempt
 def update_food_flutter(request, food_id):
@@ -79,12 +76,22 @@ def update_food_flutter(request, food_id):
             return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
 @csrf_exempt
 def dashboard_data(request):
     if request.method == "GET":
-        foods = Food.objects.all().values()  # Mengambil semua data makanan
-        return JsonResponse(list(foods), safe=False)
-    return JsonResponse({'error': 'Metode tidak diizinkan'}, status=405)
+        foods = Food.objects.all().values()
+        data = list(foods)
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Data retrieved successfully',
+            'data': data
+        }, safe=False, status=200)
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Method not allowed',
+        'data': None
+    }, status=405)
 
 
 @api_view(['GET'])
@@ -118,15 +125,15 @@ def user_dashboard(request):
     ]
     return JsonResponse(data, safe=False)
 
+
 @login_required
 def dashboard(request):
-    sort_by = request.GET.get('sort_by', 'price')  
-    sort_order = request.GET.get('sort_order', 'asc')  
-
+    sort_by = request.GET.get('sort_by', 'price')
+    sort_order = request.GET.get('sort_order', 'asc')
 
     if sort_by == 'name':
         foods = Food.objects.filter(created_by=request.user).order_by('name' if sort_order == 'asc' else '-name')
-    else: 
+    else:
         foods = Food.objects.filter(created_by=request.user).order_by('price' if sort_order == 'asc' else '-price')
 
     return render(request, 'dashboard.html', {'foods': foods, 'sort_by': sort_by, 'sort_order': sort_order})
@@ -141,8 +148,7 @@ def add_food(request):
             food = form.save(commit=False)
             food.created_by = request.user
             food.save()
-            
-            
+
             # Cek apakah request berasal dari AJAX
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({
@@ -151,13 +157,14 @@ def add_food(request):
                     'message': 'Food added successfully!',
                 })
             return redirect('dashboard:dashboard')
-    
+
     else:
         form = FoodForm()
-    
+
     return render(request, 'add_food.html', {'form': form})
 
-# Edit Food AJAX 
+
+# Edit Food AJAX
 @login_required
 def edit_food(request, id):
     food = get_object_or_404(Food, id=id, created_by=request.user)
@@ -165,7 +172,7 @@ def edit_food(request, id):
         form = FoodForm(request.POST, instance=food)
         if form.is_valid():
             form.save()
-            
+
             # Cek apakah request berasal dari AJAX
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({
@@ -182,9 +189,10 @@ def edit_food(request, id):
 
 @login_required
 def delete_food(request, id):
-    food = get_object_or_404(Food, id=id)  
+    food = get_object_or_404(Food, id=id)
     food.delete()
-    return redirect('dashboard:dashboard')  
+    return redirect('dashboard:dashboard')
+
 
 @csrf_exempt
 def delete_food_flutter(request, food_id):
@@ -197,27 +205,37 @@ def delete_food_flutter(request, food_id):
             return JsonResponse({'error': 'Makanan tidak ditemukan'}, status=404)
     return JsonResponse({'error': 'Metode tidak diizinkan'}, status=405)
 
+
 def get_foods(request):
     if request.method == 'GET':
-        print("GET foods endpoint accessed")  # Debug log
-        foods = Food.objects.all()  # Ambil semua data makanan
+        foods = Food.objects.all()
         data = [
             {
                 "id": food.id,
                 "name": food.name,
                 "description": food.description,
                 "price": food.price,
-                "image_url": food.image_url,  # Menambahkan URL gambar
-                "restoran": food.restaurant,
+                "image_url": food.image_url,
+                "restaurant": food.restaurant,
+                "created_by_id": food.created_by_id,
             }
             for food in foods
         ]
-        return JsonResponse(data, safe=False)  # Mengembalikan JSON
-    else:
-        return JsonResponse({"error": "Invalid request method"}, status=405)
-    
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Data retrieved successfully',
+            'data': data
+        }, safe=False, status=200)
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Method not allowed',
+        'data': None
+    }, status=405)
+
+
+
 @api_view(['GET'])
 def get_food_list(request):
-    foods = Food.objects.filter(created_by=request.user) # Mengambil semua makanan dari database
+    foods = Food.objects.filter(created_by=request.user)  # Mengambil semua makanan dari database
     serializer = FoodSerializer(foods, many=True)
-    return Response(serializer.data)
+    return JsonResponse(serializer.data)

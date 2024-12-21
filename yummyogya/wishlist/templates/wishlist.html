@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Google Fonts (Poppins) -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
@@ -14,7 +14,7 @@
     <style>
         /* Import font */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
-        
+
         /* Base styling */
         html, body {
             height: 100%;
@@ -160,6 +160,39 @@
             width: 30px;
             height: 30px;
         }
+
+        .notes-section {
+            margin-top: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .notes-textarea {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn-update-notes {
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            color: white;
+            background-color: #28a745;
+            border: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .btn-update-notes:hover {
+            background-color: #218838;
+        }
+
+        .existing-notes {
+            color: #666;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
     </style>
 
 </head>
@@ -171,11 +204,10 @@
     {% block content %}
     {% include 'navbar.html' %}
 
-    <!-- Wishlist Content -->
+
     <div class="container content">
         <h2 class="wishlist-title">Your Wishlist</h2>
 
-        <!-- Display Messages -->
         {% if messages %}
             <div class="alert alert-success text-center" role="alert">
                 {% for message in messages %}
@@ -185,8 +217,9 @@
         {% endif %}
 
         <div class="row">
-            {% if wishlist.food.all %}
-                {% for food in wishlist.food.all %}
+            {% if wishlist_items %}
+                {% for wishlist_item in wishlist_items %}
+                {% with food=wishlist_item.food %}
                 <div class="col-lg-4 col-md-6 col-sm-12">
                     <div class="card">
                         <img class="card-img-top" src="{{ food.gambar }}" alt="{{ food.nama }}">
@@ -196,9 +229,24 @@
                             <p class="description">{{ food.deskripsi|truncatewords:10 }}</p>
                             <p class="rating">Rating: {{ food.rating }} / 5</p>
                             <a href="{% url 'wishlist:remove_from_wishlist' food.id %}" class="btn-remove">Remove</a>
+
+                            <!-- Notes Section -->
+                            <div class="notes-section">
+                                <form method="POST" action="{% url 'wishlist:update_wishlist_item_notes' food.id %}">
+                                    {% csrf_token %}
+                                    <textarea name="notes" class="notes-textarea" placeholder="Add your notes here..." rows="3">{{ wishlist_item.notes }}</textarea>
+                                    <button type="submit" class="btn-update-notes">Save Notes</button>
+                                </form>
+                                {% if wishlist_item.notes %}
+                                  <div class="existing-notes">
+                                    <strong>Your Notes:</strong> {{ wishlist_item.notes }}
+                                  </div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
+                {% endwith %}
                 {% endfor %}
             {% else %}
                 <div class="empty-wishlist">Your wishlist is empty!</div>
@@ -209,10 +257,44 @@
             <img src="{% static 'images/plus_icon.png' %}" alt="Add">
         </a>
     </div>
+
+    <!-- Add JavaScript for notes functionality -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const notesTextareas = document.querySelectorAll('.wishlist-notes');
+
+            notesTextareas.forEach(textarea => {
+                textarea.addEventListener('blur', function() {
+                    const foodId = this.dataset.foodId;
+                    const notes = this.value;
+
+                    fetch(`/wishlist/update-notes/${foodId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        },
+                        body: `notes=${encodeURIComponent(notes)}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Notes updated successfully');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                });
+            });
+        });
+    </script>
+
+    {% csrf_token %}
     {% endblock %}
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    
+
 </body>
 </html>

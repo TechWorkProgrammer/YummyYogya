@@ -9,6 +9,3 @@ from django.http import JsonResponse
 # Register your models here.
 admin.site.register(Makanan)
 admin.site.register(Wishlist)
-
-
-

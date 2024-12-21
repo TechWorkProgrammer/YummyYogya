@@ -135,7 +135,7 @@ class _EditFoodScreenState extends State<EditFoodScreen> {
                 decoration: const InputDecoration(labelText: 'Harga'),
                 style: TextStyle(
                   color:
-                      _priceFocusNode.hasFocus ? Colors.orange : Colors.black,
+                  _priceFocusNode.hasFocus ? Colors.orange : Colors.black,
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
@@ -207,7 +207,7 @@ class _EditFoodScreenState extends State<EditFoodScreen> {
                 decoration: const InputDecoration(labelText: 'Rating'),
                 style: TextStyle(
                   color:
-                      _ratingFocusNode.hasFocus ? Colors.orange : Colors.black,
+                  _ratingFocusNode.hasFocus ? Colors.orange : Colors.black,
                 ),
                 keyboardType: TextInputType.number,
                 validator: (value) {
@@ -257,7 +257,7 @@ class _EditFoodScreenState extends State<EditFoodScreen> {
                       restaurant: _restaurantController.text,
                       category: _categoryController.text,
                       rating:
-                          _ratingController.text, // Pastikan ini tipe double
+                      _ratingController.text, // Pastikan ini tipe double
                     );
 
                     // Mengirim data yang diperbarui ke Django

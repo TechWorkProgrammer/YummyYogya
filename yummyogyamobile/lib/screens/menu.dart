@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:yummyogya_mobile/widgets/left_drawer.dart';
-import 'package:yummyogya_mobile/widgets/bottom_nav.dart';
-import 'package:yummyogya_mobile/screens/search.dart';
 import 'package:yummyogya_mobile/utils/auth.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -12,7 +9,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _currentIndex = 0;
   String username = 'Pengguna';
 
   @override
@@ -30,43 +26,9 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _onTap(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const MyHomePage(),
-          ),
-        );
-        break;
-      case 1:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SearchPage(username: username,),
-          ),
-        );
-        break;
-      case 2:
-        break;
-      case 3:
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('YummyYogya'),
-        backgroundColor: Colors.orange,
-      ),
-      drawer: const LeftDrawer(),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -76,8 +38,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   height: 400,
                   decoration: const BoxDecoration(
                     image: DecorationImage(
-                      image:
-                      NetworkImage('https://via.placeholder.com/800x400'),
+                      image: NetworkImage(
+                          'https://areajogja.wordpress.com/wp-content/uploads/2020/09/hipwee-spot-pedestrian-titik-nol-km-jogja-sumber-ig-jogjagokil-678x422-1-2.jpg'),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -87,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Colors.black.withOpacity(0.7),
+                        Colors.black.withOpacity(0.8),
                         Colors.transparent,
                       ],
                       begin: Alignment.bottomCenter,
@@ -127,10 +89,6 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNav(
-        currentIndex: _currentIndex,
-        onTap: _onTap,
       ),
     );
   }

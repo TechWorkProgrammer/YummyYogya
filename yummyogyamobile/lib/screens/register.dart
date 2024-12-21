@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:yummyogya_mobile/screens/base.dart';
 import 'package:yummyogya_mobile/screens/login.dart';
-import 'package:yummyogya_mobile/screens/menu.dart';
 import 'package:yummyogya_mobile/utils/variable.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -80,7 +80,7 @@ class _RegisterPageState extends State<RegisterPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => const MyHomePage(),
+              builder: (context) => const BasePage(),
             ),
           );
         } else {

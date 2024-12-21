@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:yummyogya_mobile/screens/menu.dart';
+import 'package:yummyogya_mobile/screens/base.dart';
 import 'package:yummyogya_mobile/screens/register.dart';
 import 'package:yummyogya_mobile/utils/auth.dart';
 import 'package:yummyogya_mobile/utils/variable.dart';
@@ -63,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => const MyHomePage(),
+              builder: (context) => const BasePage(),
             ),
           );
           ScaffoldMessenger.of(context)

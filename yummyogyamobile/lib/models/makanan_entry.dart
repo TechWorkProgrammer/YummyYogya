@@ -7,81 +7,49 @@ String makananToJson(List<Makanan> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class Makanan {
-  Model model;
-  int pk;
-  Fields fields;
+  int id;
+  String name;
+  int price;
+  String description;
+  String category;
+  String restaurant;
+  String rating;
+  String imageUrl;
+  int createdById;
 
   Makanan({
-    required this.model,
-    required this.pk,
-    required this.fields,
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.description,
+    required this.category,
+    required this.restaurant,
+    required this.rating,
+    required this.imageUrl,
+    required this.createdById,
   });
 
   factory Makanan.fromJson(Map<String, dynamic> json) => Makanan(
-        model: modelValues.map[json["model"]]!,
-        pk: json["pk"],
-        fields: Fields.fromJson(json["fields"]),
-      );
+    id: json["id"],
+    name: json["name"],
+    price: json["price"],
+    description: json["description"],
+    category: json["category"],
+    restaurant: json["restaurant"],
+    rating: json["rating"],
+    imageUrl: json["image_url"],
+    createdById: json["created_by_id"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "model": modelValues.reverse[model],
-        "pk": pk,
-        "fields": fields.toJson(),
-      };
-}
-
-class Fields {
-  String nama;
-  String deskripsi;
-  String kategori;
-  String restoran;
-  int harga;
-  String rating;
-  String gambar;
-
-  Fields({
-    required this.nama,
-    required this.deskripsi,
-    required this.kategori,
-    required this.restoran,
-    required this.harga,
-    required this.rating,
-    required this.gambar,
-  });
-
-  factory Fields.fromJson(Map<String, dynamic> json) => Fields(
-        nama: json["nama"],
-        deskripsi: json["deskripsi"],
-        kategori: json["kategori"],
-        restoran: json["restoran"],
-        harga: json["harga"],
-        rating: json["rating"],
-        gambar: json["gambar"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "nama": nama,
-        "deskripsi": deskripsi,
-        "kategori": kategori,
-        "restoran": restoran,
-        "harga": harga,
-        "rating": rating,
-        "gambar": gambar,
-      };
-}
-
-enum Model { MAIN_MAKANAN }
-
-final modelValues = EnumValues({"main.makanan": Model.MAIN_MAKANAN});
-
-class EnumValues<T> {
-  Map<String, T> map;
-  late Map<T, String> reverseMap;
-
-  EnumValues(this.map);
-
-  Map<T, String> get reverse {
-    reverseMap = map.map((k, v) => MapEntry(v, k));
-    return reverseMap;
-  }
+    "id": id,
+    "name": name,
+    "price": price,
+    "description": description,
+    "category": category,
+    "restaurant": restaurant,
+    "rating": rating,
+    "image_url": imageUrl,
+    "created_by_id": createdById,
+  };
 }

@@ -44,7 +44,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final List<FoodEntry> data =
-            foodEntryFromJson(response.body); // Gunakan foodEntryFromJson
+        foodEntryFromJson(response.body); // Gunakan foodEntryFromJson
         setState(() {
           _foodEntries = data;
           _sortFoodEntries(_sortBy);
@@ -266,184 +266,184 @@ class _DashboardScreenState extends State<DashboardScreen> {
       body: _foodEntries.isEmpty
           ? const Center(child: Text("Belum ada makanan yang ditambahkan"))
           : LayoutBuilder(
-              builder: (context, constraints) {
-                // Hitung jumlah kolom berdasarkan lebar layar
-                final int crossAxisCount =
-                    max(2, (constraints.maxWidth / 200).floor());
-                final double childAspectRatio =
-                    constraints.maxWidth / (crossAxisCount * 350);
+        builder: (context, constraints) {
+          // Hitung jumlah kolom berdasarkan lebar layar
+          final int crossAxisCount =
+          max(2, (constraints.maxWidth / 200).floor());
+          final double childAspectRatio =
+              constraints.maxWidth / (crossAxisCount * 350);
 
-                return GridView.builder(
-                  padding: const EdgeInsets.all(8.0),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: crossAxisCount, // Jumlah kolom dinamis
-                    crossAxisSpacing: 8.0, // Spasi horizontal antar kolom
-                    mainAxisSpacing: 8.0, // Spasi vertikal antar baris
-                    childAspectRatio: childAspectRatio, // Rasio aspek dinamis
-                  ),
-                  itemCount: _foodEntries.length,
-                  itemBuilder: (context, index) {
-                    final food = _foodEntries[index];
-                    return Card(
-                      elevation: 4.0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
+          return GridView.builder(
+            padding: const EdgeInsets.all(8.0),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount, // Jumlah kolom dinamis
+              crossAxisSpacing: 8.0, // Spasi horizontal antar kolom
+              mainAxisSpacing: 8.0, // Spasi vertikal antar baris
+              childAspectRatio: childAspectRatio, // Rasio aspek dinamis
+            ),
+            itemCount: _foodEntries.length,
+            itemBuilder: (context, index) {
+              final food = _foodEntries[index];
+              return Card(
+                elevation: 4.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(12.0),
+                          topRight: Radius.circular(12.0),
+                        ),
+                        child: Image.network(
+                          food.image_url,
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: progress.expectedTotalBytes != null
+                                    ? progress.cumulativeBytesLoaded /
+                                    (progress.expectedTotalBytes!)
+                                    : null,
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) =>
+                          const Center(
+                            child: Icon(Icons.broken_image, size: 40),
+                          ),
+                        ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        food.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14, // Ukuran font disesuaikan
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
+                    Padding(
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        food.description,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors
+                              .grey, // Warna abu-abu untuk teks yang lebih pudar
+                        ),
+                        softWrap: true, // Membungkus teks jika panjang
+                        maxLines:
+                        3, // Maksimal 3 baris, tambahkan jika ingin membatasi
+                      ),
+                    ),
+                    Padding(
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
                         children: [
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(12.0),
-                                topRight: Radius.circular(12.0),
-                              ),
-                              child: Image.network(
-                                food.image_url,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                loadingBuilder: (context, child, progress) {
-                                  if (progress == null) return child;
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      value: progress.expectedTotalBytes != null
-                                          ? progress.cumulativeBytesLoaded /
-                                              (progress.expectedTotalBytes!)
-                                          : null,
-                                    ),
-                                  );
-                                },
-                                errorBuilder: (context, error, stackTrace) =>
-                                    const Center(
-                                  child: Icon(Icons.broken_image, size: 40),
-                                ),
-                              ),
-                            ),
+                          const Icon(Icons.attach_money,
+                              size: 14,
+                              color: Colors.black), // Ikon Price
+                          const SizedBox(
+                              width:
+                              4), // Spasi kecil antara ikon dan teks
+                          Text(
+                            "${food.price}",
+                            style: const TextStyle(fontSize: 12),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              food.name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14, // Ukuran font disesuaikan
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                              food.description,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors
-                                    .grey, // Warna abu-abu untuk teks yang lebih pudar
-                              ),
-                              softWrap: true, // Membungkus teks jika panjang
-                              maxLines:
-                                  3, // Maksimal 3 baris, tambahkan jika ingin membatasi
-                            ),
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.attach_money,
-                                    size: 14,
-                                    color: Colors.black), // Ikon Price
-                                const SizedBox(
-                                    width:
-                                        4), // Spasi kecil antara ikon dan teks
-                                Text(
-                                  "${food.price}",
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.star,
-                                    size: 14,
-                                    color: Colors.black), // Ikon Rating
-                                const SizedBox(width: 4),
-                                Text(
-                                  "${food.rating}",
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.category,
-                                    size: 14,
-                                    color: Colors.black), // Ikon Category
-                                const SizedBox(width: 4),
-                                Text(
-                                  food.category,
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment
-                                  .start, // Pastikan teks disejajarkan dengan baik
-                              children: [
-                                const Icon(
-                                  Icons.restaurant,
-                                  size: 14,
-                                  color: Colors.black, // Ikon Restaurant
-                                ),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  // Jika ruang terbatas, teks tetap bisa membungkus
-                                  child: Text(
-                                    food.restaurant,
-                                    style: const TextStyle(fontSize: 12),
-                                    softWrap:
-                                        true, // Membungkus teks ke baris berikutnya
-                                    maxLines:
-                                        3, // Tidak ada batasan jumlah baris
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit, size: 20),
-                                onPressed: () => _editFood(food),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, size: 20),
-                                onPressed: () => _deleteFoodFromServer(food.id),
-                              ),
-                            ],
-                          )
                         ],
                       ),
-                    );
-                  },
-                );
-              },
-            ),
+                    ),
+                    Padding(
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.star,
+                              size: 14,
+                              color: Colors.black), // Ikon Rating
+                          const SizedBox(width: 4),
+                          Text(
+                            "${food.rating}",
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.category,
+                              size: 14,
+                              color: Colors.black), // Ikon Category
+                          const SizedBox(width: 4),
+                          Text(
+                            food.category,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment
+                            .start, // Pastikan teks disejajarkan dengan baik
+                        children: [
+                          const Icon(
+                            Icons.restaurant,
+                            size: 14,
+                            color: Colors.black, // Ikon Restaurant
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            // Jika ruang terbatas, teks tetap bisa membungkus
+                            child: Text(
+                              food.restaurant,
+                              style: const TextStyle(fontSize: 12),
+                              softWrap:
+                              true, // Membungkus teks ke baris berikutnya
+                              maxLines:
+                              3, // Tidak ada batasan jumlah baris
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit, size: 20),
+                          onPressed: () => _editFood(food),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, size: 20),
+                          onPressed: () => _deleteFoodFromServer(food.id),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
       floatingActionButton: Container(
         margin: const EdgeInsets.only(bottom: 16.0), // Jarak dari bawah
         child: FloatingActionButton.extended(
@@ -459,7 +459,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
       floatingActionButtonLocation:
-          FloatingActionButtonLocation.centerFloat, // Letakkan di tengah bawah
+      FloatingActionButtonLocation.centerFloat, // Letakkan di tengah bawah
     );
   }
 }

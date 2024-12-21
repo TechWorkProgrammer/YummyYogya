@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:yummyogya_mobile/components/menu_item.dart';
+import 'package:yummyogya_mobile/components/profile_avatar.dart';
 import 'package:yummyogya_mobile/dashboard/screens/dashboard_screen.dart';
+import 'package:yummyogya_mobile/screens/base.dart';
 import 'package:yummyogya_mobile/screens/login.dart';
 import 'package:yummyogya_mobile/utils/auth.dart';
 import 'package:yummyogya_mobile/utils/variable.dart';
-import 'package:yummyogya_mobile/widgets/menu_item.dart';
 
 class LeftDrawer extends StatefulWidget {
   const LeftDrawer({super.key});
@@ -38,7 +40,7 @@ class _LeftDrawerState extends State<LeftDrawer> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),
-            (route) => false,
+        (route) => false,
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -60,13 +62,7 @@ class _LeftDrawerState extends State<LeftDrawer> {
             ),
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 35,
-                  backgroundImage: profilePhoto != null
-                      ? NetworkImage('$baseUrl/$profilePhoto')
-                      : const AssetImage('assets/default_avatar.png')
-                  as ImageProvider,
-                ),
+                ProfileAvatar(profilePhoto: '$baseUrl/$profilePhoto'),
                 const SizedBox(width: 16.0),
                 Expanded(
                   child: Column(
@@ -98,14 +94,28 @@ class _LeftDrawerState extends State<LeftDrawer> {
             child: ListView(
               children: [
                 MenuItem(
-                  icon: Icons.search,
-                  text: 'Cari Makanan',
-                  onTap: () => Navigator.pushNamed(context, '/search'),
+                  icon: Icons.home,
+                  text: 'Kembali ke Homepage',
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const BasePage(),
+                      ),
+                    );
+                  },
                 ),
                 MenuItem(
-                  icon: Icons.edit,
-                  text: 'Edit Profil',
-                  onTap: () => Navigator.pushNamed(context, '/editProfile'),
+                  icon: Icons.search,
+                  text: 'Cari Makanan',
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const BasePage(initialIndex: 1,),
+                      ),
+                    );
+                  },
                 ),
                 MenuItem(
                   icon: Icons.dashboard,
@@ -123,17 +133,25 @@ class _LeftDrawerState extends State<LeftDrawer> {
                 MenuItem(
                   icon: Icons.favorite,
                   text: 'Wishlist',
-                  onTap: () => Navigator.pushNamed(context, '/wishlist'),
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const BasePage(initialIndex: 2,),
+                      ),
+                    );
+                  },
                 ),
                 const Divider(),
                 MenuItem(
-                  icon: Icons.home,
-                  text: 'Kembali ke Homepage',
+                  icon: Icons.edit,
+                  text: 'Edit Profil',
                   onTap: () {
-                    Navigator.pushNamedAndRemoveUntil(
+                    Navigator.pushReplacement(
                       context,
-                      '/menu',
-                          (route) => false,
+                      MaterialPageRoute(
+                        builder: (context) => const BasePage(initialIndex: 3,),
+                      ),
                     );
                   },
                 ),
