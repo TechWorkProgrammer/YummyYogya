@@ -1,30 +1,10 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'register.dart';
-import 'menu.dart';
-
-void main() {
-  runApp(const LoginApp());
-}
-
-class LoginApp extends StatelessWidget {
-  const LoginApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Login',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSwatch(
-          primarySwatch: Colors.deepOrange,
-        ).copyWith(secondary: Colors.orangeAccent),
-      ),
-      home: const LoginPage(),
-    );
-  }
-}
+import 'package:yummyogya_mobile/screens/menu.dart';
+import 'package:yummyogya_mobile/screens/register.dart';
+import 'package:yummyogya_mobile/variable.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -43,6 +23,7 @@ class _LoginPageState extends State<LoginPage> {
     final String password = _passwordController.text;
 
     if (username.isEmpty || password.isEmpty) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Username dan password tidak boleh kosong"),
@@ -55,53 +36,55 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = true;
     });
 
-    // URL endpoint Django
-    const String url = 'http://127.0.0.1:8000/authentication/login_flutter/';
+    const String loginUrl = '$baseUrl/authentication/login_flutter/';
 
     try {
       final response = await http.post(
-        Uri.parse(url),
+        Uri.parse(loginUrl),
         body: {
           'username': username,
           'password': password,
         },
       );
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> data = jsonDecode(response.body);
+      if (!mounted) return;
 
+      final Map<String, dynamic> data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
         if (data['status'] == true) {
           String message = data['message'];
           String uname = data['username'];
 
-          // Navigasi ke halaman utama (MyHomePage dari menu.dart)
-          if (context.mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MyHomePage(username: uname),
-              ),
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MyHomePage(username: uname),
+            ),
+          );
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(content: Text("$message Selamat datang, $uname!")),
             );
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(content: Text("$message Selamat datang, $uname!")),
-              );
-          }
+        } else {
+          String errorMessage = data['message'] ?? 'Gagal login.';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorMessage)),
+          );
         }
       } else {
-        // Gagal login
-        final Map<String, dynamic> data = jsonDecode(response.body);
-        String errorMessage = data['message'];
+        String errorMessage = data['message'] ?? 'Terjadi kesalahan saat login.';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error: $errorMessage")),
         );
       }
     } catch (e) {
-      // Jika ada error saat koneksi
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Terjadi kesalahan: $e")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Kesalahan koneksi: $e")),
+        );
+      }
     }
 
     setState(() {
@@ -112,90 +95,122 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
-      ),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Card(
-            elevation: 8,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Masuk ke Akun Anda',
+                style: TextStyle(
+                  fontSize: 28.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 40.0),
+              TextField(
+                controller: _usernameController,
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                  labelStyle: const TextStyle(
+                    fontSize: 16.0,
+                    color: Color(0xFFEA580C),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(color: Color(0xFFEA580C)),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    borderSide: BorderSide(color: Color(0xFFEA580C)),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    borderSide:
+                        BorderSide(color: Color(0xFFEA580C), width: 2.0),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 14.0),
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              TextField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  labelStyle: const TextStyle(
+                    fontSize: 16.0,
+                    color: Color(0xFFEA580C),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(color: Color(0xFFEA580C)),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    borderSide: BorderSide(color: Color(0xFFEA580C)),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    borderSide:
+                        BorderSide(color: Color(0xFFEA580C), width: 2.0),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 14.0),
+                ),
+              ),
+              const SizedBox(height: 24.0),
+              _isLoading
+                  ? const CircularProgressIndicator(
+                      color: Color(0xFFEA580C),
+                    )
+                  : ElevatedButton(
+                      onPressed: _login,
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: const Color(0xFFEA580C),
+                        minimumSize: const Size(double.infinity, 50),
+                        padding: const EdgeInsets.symmetric(vertical: 14.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      child: const Text(
+                        'Masuk',
+                        style: TextStyle(fontSize: 16.0),
+                      ),
+                    ),
+              const SizedBox(height: 16.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'Login',
-                    style: TextStyle(
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    "Belum punya akun? ",
+                    style: TextStyle(fontSize: 14.0),
                   ),
-                  const SizedBox(height: 30.0),
-                  TextField(
-                    controller: _usernameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Username',
-                      hintText: 'Masukkan username Anda',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
-                      ),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                    ),
-                  ),
-                  const SizedBox(height: 12.0),
-                  TextField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      hintText: 'Masukkan password Anda',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
-                      ),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                    ),
-                    obscureText: true,
-                  ),
-                  const SizedBox(height: 24.0),
-                  _isLoading
-                      ? const CircularProgressIndicator()
-                      : ElevatedButton(
-                          onPressed: _login,
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size(double.infinity, 50),
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primary,
-                            padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          ),
-                          child: const Text('Login'),
-                        ),
-                  const SizedBox(height: 16.0),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const RegisterPage()),
+                          builder: (context) => const RegisterPage(),
+                        ),
                       );
                     },
-                    child: Text(
-                      'Belum punya akun? Register di sini',
+                    child: const Text(
+                      'Daftar',
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontSize: 16.0,
+                        color: Color(0xFFEA580C),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.0,
                       ),
                     ),
                   ),
                 ],
               ),
-            ),
+            ],
           ),
         ),
       ),

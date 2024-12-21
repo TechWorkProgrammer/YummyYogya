@@ -1,6 +1,9 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:yummyogya_mobile/screens/login.dart';
+import 'package:yummyogya_mobile/variable.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -22,16 +25,21 @@ class _RegisterPageState extends State<RegisterPage> {
     final String confirmPassword = _confirmPasswordController.text;
 
     if (username.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Semua field harus diisi")),
+        const SnackBar(
+          content: Text("Semua field harus diisi."),
+        ),
       );
       return;
     }
 
     if (password != confirmPassword) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text("Password dan konfirmasi password tidak cocok")),
+          content: Text("Password dan konfirmasi password tidak sama."),
+        ),
       );
       return;
     }
@@ -40,12 +48,11 @@ class _RegisterPageState extends State<RegisterPage> {
       _isLoading = true;
     });
 
-    // URL endpoint Django
-    const String url = 'http://127.0.0.1:8000/authentication/register_flutter/';
+    const String registerUrl = '$baseUrl/authentication/register_flutter/';
 
     try {
       final response = await http.post(
-        Uri.parse(url),
+        Uri.parse(registerUrl),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'username': username,
@@ -54,34 +61,39 @@ class _RegisterPageState extends State<RegisterPage> {
         }),
       );
 
-      if (response.statusCode == 200) {
-        // Parsing respon JSON
-        final Map<String, dynamic> data = jsonDecode(response.body);
+      if (!mounted) return;
 
-        if (data['status'] == 'success') {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        if (data['status'] == true) {
           String message = data['message'];
 
-          // Navigasi kembali ke halaman login
-          if (context.mounted) {
-            Navigator.pop(context);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(message)),
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(content: Text("$message Registrasi berhasil!")),
             );
-          }
+          Navigator.pop(context);
+        } else {
+          String errorMessage = data['message'] ?? 'Gagal registrasi.';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorMessage)),
+          );
         }
       } else {
-        // Gagal registrasi
-        final Map<String, dynamic> data = jsonDecode(response.body);
-        String errorMessage = data['message'];
+        String errorMessage =
+            data['message'] ?? 'Terjadi kesalahan saat registrasi.';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error: $errorMessage")),
         );
       }
     } catch (e) {
-      // Jika ada error saat koneksi
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Terjadi kesalahan: $e")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Kesalahan koneksi: $e")),
+        );
+      }
     }
 
     setState(() {
@@ -92,100 +104,149 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Register'),
-      ),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Card(
-            elevation: 8,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Buat Akun Baru',
+                style: TextStyle(
+                  fontSize: 28.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 40.0),
+              TextField(
+                controller: _usernameController,
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                  labelStyle: const TextStyle(
+                    fontSize: 16.0,
+                    color: Color(0xFFEA580C),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(color: Color(0xFFEA580C)),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    borderSide: BorderSide(color: Color(0xFFEA580C)),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    borderSide:
+                        BorderSide(color: Color(0xFFEA580C), width: 2.0),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 14.0),
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              TextField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  labelStyle: const TextStyle(
+                    fontSize: 16.0,
+                    color: Color(0xFFEA580C),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(color: Color(0xFFEA580C)),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    borderSide: BorderSide(color: Color(0xFFEA580C)),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    borderSide:
+                        BorderSide(color: Color(0xFFEA580C), width: 2.0),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 14.0),
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              TextField(
+                controller: _confirmPasswordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Konfirmasi Password',
+                  labelStyle: const TextStyle(
+                    fontSize: 16.0,
+                    color: Color(0xFFEA580C),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(color: Color(0xFFEA580C)),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    borderSide: BorderSide(color: Color(0xFFEA580C)),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    borderSide:
+                        BorderSide(color: Color(0xFFEA580C), width: 2.0),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 14.0),
+                ),
+              ),
+              const SizedBox(height: 24.0),
+              _isLoading
+                  ? const CircularProgressIndicator(
+                      color: Color(0xFFEA580C),
+                    )
+                  : ElevatedButton(
+                      onPressed: _register,
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: const Color(0xFFEA580C),
+                        minimumSize: const Size(double.infinity, 50),
+                        padding: const EdgeInsets.symmetric(vertical: 14.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      child: const Text(
+                        'Daftar',
+                        style: TextStyle(fontSize: 16.0),
+                      ),
+                    ),
+              const SizedBox(height: 16.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'Register',
-                    style: TextStyle(
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    "Sudah punya akun? ",
+                    style: TextStyle(fontSize: 14.0),
                   ),
-                  const SizedBox(height: 30.0),
-                  TextField(
-                    controller: _usernameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Username',
-                      hintText: 'Masukkan username Anda',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
-                      ),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                    ),
-                  ),
-                  const SizedBox(height: 12.0),
-                  TextField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      hintText: 'Masukkan password Anda',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
-                      ),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                    ),
-                    obscureText: true,
-                  ),
-                  const SizedBox(height: 12.0),
-                  TextField(
-                    controller: _confirmPasswordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Konfirmasi Password',
-                      hintText: 'Masukkan ulang password Anda',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(12.0)),
-                      ),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                    ),
-                    obscureText: true,
-                  ),
-                  const SizedBox(height: 24.0),
-                  _isLoading
-                      ? const CircularProgressIndicator()
-                      : ElevatedButton(
-                          onPressed: _register,
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size(double.infinity, 50),
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primary,
-                            padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          ),
-                          child: const Text('Register'),
-                        ),
-                  const SizedBox(height: 16.0),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pop(context); // Kembali ke halaman login
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginPage(),
+                        ),
+                      );
                     },
-                    child: Text(
-                      'Sudah punya akun? Login di sini',
+                    child: const Text(
+                      'Login',
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontSize: 16.0,
+                        color: Color(0xFFEA580C),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.0,
                       ),
                     ),
                   ),
                 ],
               ),
-            ),
+            ],
           ),
         ),
       ),
