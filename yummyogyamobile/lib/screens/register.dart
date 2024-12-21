@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:yummyogya_mobile/screens/base.dart';
 import 'package:yummyogya_mobile/screens/login.dart';
+import 'package:yummyogya_mobile/utils/auth.dart';
 import 'package:yummyogya_mobile/utils/variable.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -71,6 +72,9 @@ class _RegisterPageState extends State<RegisterPage> {
           String message = data['message'];
           Map<String, dynamic> userData = data['user_data'];
 
+          await Auth.saveUser(userData);
+          
+          if (!mounted) return;
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
